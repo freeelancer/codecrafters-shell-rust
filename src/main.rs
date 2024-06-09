@@ -20,6 +20,14 @@ fn main() {
             ["echo", ..] => {
                 let echo_string = inputs[1..].join(" ");
                 println!("{}", echo_string);
+            },
+            ["type", command] => {
+                match command {
+                    "exit" => println!("exit is a shell builtin"),
+                    "echo" => println!("echo is a shell builtin"),
+                    "type" => println!("type is a shell builtin"),
+                    _ => println!("{} not found", command),
+                }
             }
             _ => println!("{}: command not found", inputs[0]),
         }
