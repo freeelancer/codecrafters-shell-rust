@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::{env, path::PathBuf, process::Command};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -27,42 +28,45 @@ fn main() {
                 "type" => println!("type is a shell builtin"),
                 _ => println!("{}", check_bin(arg)),
             },
-            [command, ..] => run_bin(command, inputs[1..].to_vec()),
+            [command, ..] => {
+                if let Some(err) = run_bin(command, inputs[1..].to_vec()) {
+                    println!("{}", err);
+                }
+            }
             _ => println!("{}: command not found", inputs[0]),
         }
     }
 }
 
-fn check_bin(file_name: &str) -> String {
-    // get PATH environment variable
-    let paths_env: String = std::env::var("PATH").unwrap();
-    // split the path into a vector of paths
-    let paths: Vec<&str> = paths_env.split(":").collect();
-    // iterate over the paths
-    for path in paths {
-        // check if the file exists in the path
-        let file_path = format!("{}/{}", path, file_name);
-        if std::fs::metadata(&file_path).is_ok() {
-            return format!("{} is {}", file_name, &file_path);
+fn find_exe(name: &str) -> Option<PathBuf> {
+    if let Ok(paths) = env::var("PATH") {
+        for path in env::split_paths(&paths) {
+            let exe_path = path.join(name);
+            if exe_path.is_file() {
+                return Some(exe_path);
+            }
         }
     }
-    return format!("{}: not found", file_name);
+    None
 }
 
-fn run_bin(file_name: &str, args: Vec<&str>) {
+fn check_bin(file_name: &str) -> String {
     // get PATH environment variable
-    let paths_env: String = std::env::var("PATH").unwrap();
-    // split the path into a vector of paths
-    let paths: Vec<&str> = paths_env.split(":").collect();
-    // iterate over the paths
-    for path in paths {
-        // check if the file exists in the path
-        let file_path = format!("{}/{}", path, file_name);
-        if std::fs::metadata(&file_path).is_ok() {
-            std::process::Command::new(file_path).args(args);
-            return;
-        }
+    let exe = find_exe(file_name);
+    match exe {
+        Some(path) => format!("{} is {}", file_name, path.to_str().unwrap()),
+        None => format!("{}: not found", file_name),
     }
-    println!("{}: command not found", file_name);
-    return;
+}
+
+fn run_bin(file_name: &str, args: Vec<&str>) -> Option<String> {
+    // get PATH environment variable
+    if let Some(path) = find_exe(file_name) {
+        Command::new(path)
+            .args(args)
+            .output()
+            .expect("failed to execute process");
+        return None;
+    }
+    return Some(format!("{}: not found", file_name));
 }
