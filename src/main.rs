@@ -33,6 +33,13 @@ fn main() {
                 println!("{}", current_dir.display());
             }
             ["cd", path] => {
+                if path == "~" {
+                    let home = env::var("HOME").unwrap();
+                    if let Err(err) = env::set_current_dir(home) {
+                        println!("{}", err.to_string());
+                    }
+                    continue;
+                }
                 if let Err(_) = env::set_current_dir(path) {
                     println!("cd: {}: No such file or directory", path);
                 }
