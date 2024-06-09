@@ -45,5 +45,5 @@ fn check_bin(file_name: &str) -> String {
             return format!("{} is {}", file_name, &file_path);
         }
     }
-    return format!("{}: command not found", file_name);
+    return format!("{}: not found", file_name);
 }
