@@ -27,6 +27,7 @@ fn main() {
                 "type" => println!("type is a shell builtin"),
                 _ => println!("{}", check_bin(arg)),
             },
+            [command, ..] => run_bin(command, inputs[1..].to_vec()),
             _ => println!("{}: command not found", inputs[0]),
         }
     }
@@ -46,4 +47,22 @@ fn check_bin(file_name: &str) -> String {
         }
     }
     return format!("{}: not found", file_name);
+}
+
+fn run_bin(file_name: &str, args: Vec<&str>) {
+    // get PATH environment variable
+    let paths_env: String = std::env::var("PATH").unwrap();
+    // split the path into a vector of paths
+    let paths: Vec<&str> = paths_env.split(":").collect();
+    // iterate over the paths
+    for path in paths {
+        // check if the file exists in the path
+        let file_path = format!("{}/{}", path, file_name);
+        if std::fs::metadata(&file_path).is_ok() {
+            std::process::Command::new(file_path).args(args);
+            return;
+        }
+    }
+    println!("{}: command not found", file_name);
+    return;
 }
