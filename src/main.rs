@@ -43,8 +43,8 @@ fn ls(file_name: &str) {
     for path in paths {
         // check if the file exists in the path
         let file_path = format!("{}/{}", path, file_name);
-        if std::fs::metadata(file_path).is_ok() {
-            println!("{} is {}", file_name, file_path);
+        if std::fs::metadata(&file_path).is_ok() {
+            println!("{} is {}", file_name, file_path.clone());
             return;
         }
     }
