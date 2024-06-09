@@ -28,6 +28,10 @@ fn main() {
                 "type" => println!("type is a shell builtin"),
                 _ => println!("{}", check_bin(arg)),
             },
+            ["pwd", ..] => {
+                let current_dir = env::current_dir().unwrap();
+                println!("{}", current_dir.display());
+            }
             [command, ..] => {
                 if let Some(err) = run_bin(command, inputs[1..].to_vec()) {
                     println!("{}", err);
