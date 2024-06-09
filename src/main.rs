@@ -15,23 +15,24 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
 
         // Parse the input
-        let (command, arg) = parse_input(&input);
+        let (command, args) = parse_input(&input);
         if command == "exit 0" {
             break;
         } else if command == "echo" {
-            println!("{}", arg);
+            let echo_string = args.join(" ");
+            println!("{}", echo_string);
         } else {
             println!("{}: command not found", command);
         }
     }
 }
 
-fn parse_input(input: &str) -> (&str, &str) {
+fn parse_input(input: &str) -> (&str, Vec<&str>) {
     let iter: Vec<&str> = input.split_whitespace().collect();
     if iter.len() == 0 {
-        return ("", "");
+        return ("", Vec::new());
     } else if iter.len() == 1 {
-        return (iter[0].trim(), "");
+        return (iter[0].trim(), Vec::new());
     }
-    return (iter[0].trim(), iter[1].trim());
+    return (iter[0].trim(), iter[1..].to_vec());
 }
