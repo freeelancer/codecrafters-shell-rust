@@ -32,8 +32,13 @@ fn main() {
                 let current_dir = env::current_dir().unwrap();
                 println!("{}", current_dir.display());
             }
+            ["cd", path] => {
+                if let Err(err) = env::set_current_dir(path) {
+                    println!("{}", err);
+                }
+            }
             [command, ..] => {
-                if let Some(err) = run_bin(command, inputs[1..].to_vec()) {
+                if let Err(err) = run_bin(command, inputs[1..].to_vec()) {
                     println!("{}", err);
                 }
             }
@@ -63,14 +68,14 @@ fn check_bin(file_name: &str) -> String {
     }
 }
 
-fn run_bin(file_name: &str, args: Vec<&str>) -> Option<String> {
+fn run_bin(file_name: &str, args: Vec<&str>) -> Result<(), String> {
     // get PATH environment variable
     if let Some(path) = find_exe(file_name) {
         Command::new(path)
             .args(args)
             .status()
             .expect("failed to execute process");
-        return None;
+        return Ok(());
     }
-    return Some(format!("{}: not found", file_name));
+    return Err(format!("{}: not found", file_name));
 }
