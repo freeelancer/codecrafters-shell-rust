@@ -64,7 +64,7 @@ fn run_bin(file_name: &str, args: Vec<&str>) -> Option<String> {
     if let Some(path) = find_exe(file_name) {
         Command::new(path)
             .args(args)
-            .output()
+            .status()
             .expect("failed to execute process");
         return None;
     }
